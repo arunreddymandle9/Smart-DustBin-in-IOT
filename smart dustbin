@@ -1,0 +1,72 @@
+#include <Servo.h>
+#include <SoftwareSerial.h>
+SoftwareSerial ArduinoUno(3,2); //servo library
+Servo servo;
+int trigPin = 8;
+int echoPin = 9;
+int trigPin1 = 10;
+int echoPin1 = 11;
+int servoPin = 4;
+int led= 13;
+long duration, dist, duration1, dist1;
+void setup() {
+Serial.begin(9600);
+ArduinoUno.begin(4800);
+pinMode(trigPin, OUTPUT);
+pinMode(echoPin, INPUT);
+pinMode(trigPin1, OUTPUT);
+pinMode(echoPin1, INPUT);
+pinMode(led, OUTPUT);
+servo.attach(servoPin);
+servo.write(0); //close cap on power on
+delay(100);
+servo.detach();
+}
+void measure() {
+digitalWrite(10,HIGH);
+digitalWrite(trigPin, LOW);
+delayMicroseconds(5);
+digitalWrite(trigPin, HIGH);
+delayMicroseconds(15);
+digitalWrite(trigPin, LOW);
+pinMode(echoPin, INPUT);
+duration = pulseIn(echoPin, HIGH);
+dist = duration * (0.0342)/2 ; //obtain distance
+}
+void measure1() {
+digitalWrite(10,HIGH);
+digitalWrite(trigPin1, LOW);
+delayMicroseconds(5);
+digitalWrite(trigPin1, HIGH);
+delayMicroseconds(15);
+digitalWrite(trigPin1, LOW);
+pinMode(echoPin1, INPUT);
+duration1 = pulseIn(echoPin1, HIGH);
+dist1 = duration1 * (0.0342)/2; //obtain distance
+}
+void loop() {
+digitalWrite(led,LOW);
+if ( dist<20 && dist1>5 ) {
+Serial.println("lid is open!");
+servo.attach(servoPin);
+delay(1);
+servo.write(0);
+delay(3000);
+servo.write(150);
+delay(1000);
+servo.detach();
+}
+Serial.println(dist);
+if ( dist1<5 ) {
+Serial.println(dist1);
+digitalWrite(led,HIGH);
+Serial.println("Dustbin is full!");
+delay(3000);
+}
+while(ArduinoUno.available()>0){
+float val = ArduinoUno.parseFloat();
+if(ArduinoUno.read()== '\n'){
+Serial.println(val);
+}
+}
+}
